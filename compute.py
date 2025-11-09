@@ -4,6 +4,8 @@ import time
 import threading
 import sys
 from datetime import datetime, timedelta
+import numpy as np
+import copy
 
 def read_locations(filename):
     locations = []
@@ -71,6 +73,80 @@ def write_solution(locations, tour, distance, prefix):
     print(f"Route written to disk as {output_filename}")
     return output_filename
 
+def kmeans(locations,k):
+
+
+   locations = np.array(locations)
+   #Random Centroids
+   clusters = {}
+   np.random.seed(37)
+
+
+   for i in range(k):
+       centroid = 2*(2*np.random.random((locations.shape[1],))-1)
+       coordinates = []
+       cluster = {
+           'centroid' : centroid,
+           'coordinates' : []
+       }
+  
+       clusters[i] = cluster
+
+   change = True
+
+   while change:
+
+
+       for i in range(locations.shape[0]):
+               dist = []
+              
+               curr = locations[i]
+              
+               for j in range(k):
+                   dis = computeEuclideanDistance(curr,clusters[j]['centroid'])
+                   dist.append(dis)
+               curr_cluster = np.argmin(dist)
+               clusters[curr_cluster]['coordinates'].append(curr)
+
+
+       curr_locations = copy.deepcopy(clusters)
+ 
+       for i in range(k):
+               coordinates = np.array(clusters[i]['coordinates'])
+               if coordinates.shape[0] > 0:
+                   new_center = coordinates.mean(axis =0)
+                   clusters[i]['centroid'] = new_center
+                  
+                   clusters[i]['coordinates'] = []
+      
+       for i in range(locations.shape[0]):
+               dist = []
+              
+               curr = locations[i]
+              
+               for j in range(k):
+                   dis = computeEuclideanDistance(curr,clusters[j]['centroid'])
+                   dist.append(dis)
+               curr_cluster = np.argmin(dist)
+               clusters[curr_cluster]['coordinates'].append(curr)
+
+       count = 0
+       for i in range(k):
+            if not np.array_equal(clusters[i]['centroid'], curr_locations[i]['centroid']):
+                count += 1
+
+
+       if count == 0:
+           change = False
+
+
+   centroids = []
+   for i in range(k):
+       centroids.append(clusters[i]['centroid'])
+
+   return centroids
+
+
 def main():
     print("ComputePossibleSolutions")
     print()
@@ -103,6 +179,12 @@ def main():
     
     print(f"There are {n} nodes: Solutions will be available by {ready_time}")
     print()
+
+
+    centroids = kmeans(locations, 1)
+
+    print(centroids)
+
 
     total_x = 0
     total_y = 0
