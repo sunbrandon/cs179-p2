@@ -4,14 +4,6 @@ import time
 import threading
 import sys
 
-stop_flag = False
-
-# Abandon on Enter from user input
-def wait_for_enter():
-    global stop_flag
-    input() # waits for Enter
-    stop_flag = True
-
 def read_locations(filename):
     locations = []
 
@@ -33,38 +25,6 @@ def read_locations(filename):
     
     except Exception as error: 
         sys.exit("Aborting. File does not exist")
-
-def strawman(locations, bestSoFar):
-    distance = 0
-    landingPad = locations[0]
-
-    for i in range(len(locations)-1):
-        distance += computeEuclideanDistance(locations[i],locations[i+1])
-        if distance >= bestSoFar:
-            return float('inf')
-
-    #for last loc
-    distance += computeEuclideanDistance(locations[-1],landingPad)
-    if distance >= bestSoFar:
-        return float('inf')
-
-    return distance
-
-def strawmanAnytime(locations, bestSoFar):
-    global stop_flag
-    start_time = time.time()
-
-    while not stop_flag:
-        if time.time() - start_time > 300:
-            break
-
-        random.shuffle(locations)
-        distance = strawman(locations, bestSoFar)
-        if distance < bestSoFar:
-            bestSoFar = distance
-            print(f"{bestSoFar:.1f}")
-
-    return bestSoFar
 
 def computeEuclideanDistance(coord1, coord2):
     return math.sqrt(((coord2[0]-coord1[0])**2) + ((coord2[1]-coord1[1])**2))
@@ -164,40 +124,6 @@ def main():
     
     print(f"There are {n} nodes, computing route...")
     print("Shortest Route Discovered So Far")
-
-    threading.Thread(target=wait_for_enter, daemon=True).start()
-
-    bestSoFar = strawman(locations, float('inf'))
-    print(f"{bestSoFar:.1f}")
-    # strawmanAnytime(locations, bestSoFar)
-
-    if bestSoFar >= 6000:
-        print(f"Warning: Solution is {bestSoFar:.1f}, greater than the 6000-meter constraint.")
-
-    best_distance = bestSoFar
-    best_tour = None
-
-    start_time = time.time()
-
-    while not stop_flag:
-        if time.time() - start_time > 60: # adjustable timeout for testing
-            break
-        # start = random.randint(0, len(locations) - 1)
-        start = 0
-        tour, dist = nearest_neighbor(locations, start, best_distance)
-
-        if dist < best_distance:
-            best_distance = dist
-            best_tour = tour
-            print(f"{best_distance:.1f}")
-
-    # nn = nearest_neighbor(locations)
-    # print(nn)
-    # enn = eamonn_nearest_neighbor(locations)
-    # print(enn)
-
-    prefix = filename.split('.')[0]
-    write_solution(locations, best_tour, best_distance, prefix)
 
     
 if __name__ == "__main__":
