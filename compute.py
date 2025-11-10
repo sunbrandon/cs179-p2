@@ -73,17 +73,23 @@ def write_solution(locations, tour, distance, prefix):
     print(f"Route written to disk as {output_filename}")
     return output_filename
 
-def kmeans(locations,k):
+def to_roman(n):
+    roman_numerals = ["i", "ii", "iii", 'iv']
+    return roman_numerals[n-1]
 
+def kmeans(locations,k):
 
    locations = np.array(locations)
    #Random Centroids
    clusters = {}
    np.random.seed(37)
-
+   
+   #picking INITIAL centroids based on random existing points
+   random_indices = np.random.choice(locations.shape[0], k, replace=False)
+   centroids = locations[random_indices]
 
    for i in range(k):
-       centroid = 2*(2*np.random.random((locations.shape[1],))-1)
+       centroid = centroids[i]
        coordinates = []
        cluster = {
            'centroid' : centroid,
@@ -139,13 +145,7 @@ def kmeans(locations,k):
        if count == 0:
            change = False
 
-
-   centroids = []
-   for i in range(k):
-       centroids.append(clusters[i]['centroid'])
-
-   return centroids
-
+   return clusters
 
 def main():
     print("ComputePossibleSolutions")
@@ -180,37 +180,31 @@ def main():
     print(f"There are {n} nodes: Solutions will be available by {ready_time}")
     print()
 
+    for k in range(1,5): # 4 experiments of k=1 through k=4.
+        clusters = kmeans(locations,k)
+        total_dist = 0
+        output_list = []
+        
+        for j in range(k): # each cluster per experiment
+            cluster_locations = clusters[j]['coordinates']
+            centroid = clusters[j]['centroid']
 
-    centroids = kmeans(locations, 1)
+            if len(cluster_locations) == 0:
+                print(f"    {to_roman(j+1)}. Landing Pad {j+1} should be at [{int(round(centroid[0]))},{int(round(centroid[1]))}], "f"serving 0 locations, route is 0.0meters")
+                continue
+            
+            tour = nearest_neighbor(cluster_locations, 0) #start at location 0 in cluster locations, starting node shouldn't matter
+            cluster_dist = total_tour_distance(cluster_locations,tour)
 
-    print(centroids)
+            total_dist += cluster_dist
 
+            output = f"    {to_roman(j+1)}. Landing Pad {j+1} should be at [{int(round(centroid[0]))},{int(round(centroid[1]))}], "f"serving {len(cluster_locations)} locations, route is {cluster_dist:.1f} meters"
+            output_list.append(output)
 
-    total_x = 0
-    total_y = 0
-    for point in locations:
-        total_x += point[0]
-        total_y += point[1]
-    
-    avg_x = total_x / n
-    avg_y = total_y / n
-
-    landing_pad = (avg_x, avg_y)
-
-    start = 0
-    min_distance = float('inf')
-
-    for i in range(n):
-        dist = computeEuclideanDistance(locations[i], landing_pad)
-        if dist < min_distance:
-            min_distance = dist
-            start = i
-
-    tour = nearest_neighbor(locations, start)
-    total_dist = total_tour_distance(locations, tour)
-
-    print(f"If you use 1 drone(s), the total route will be {total_dist:.1f} meters")
-    print(f"Landing Pad 1 should be at [{int(round(landing_pad[0]))},{int(round(landing_pad[1]))}], "f"serving {n} locations, route is {total_dist:.1f} meters")
+        print(f"{k}) If you use {k} drone(s), the total route will be {total_dist:.1f} meters")
+        for output in output_list:
+            print(output)
+        print()
     
 if __name__ == "__main__":
     main()
