@@ -1,7 +1,4 @@
 import math
-import random
-import time
-import threading
 import sys
 from datetime import datetime, timedelta
 import numpy as np
@@ -79,73 +76,73 @@ def to_roman(n):
 
 def kmeans(locations,k):
 
-   locations = np.array(locations)
-   #Random Centroids
-   clusters = {}
-   np.random.seed(37)
-   
-   #picking INITIAL centroids based on random existing points
-   random_indices = np.random.choice(locations.shape[0], k, replace=False)
-   centroids = locations[random_indices]
+    locations = np.array(locations)
+    #Random Centroids
+    clusters = {}
+    np.random.seed(37)
+    
+    #picking INITIAL centroids based on random existing points
+    random_indices = np.random.choice(locations.shape[0], k, replace=False)
+    centroids = locations[random_indices]
 
-   for i in range(k):
-       centroid = centroids[i]
-       coordinates = []
-       cluster = {
-           'centroid' : centroid,
-           'coordinates' : []
-       }
-  
-       clusters[i] = cluster
+    for i in range(k):
+        centroid = centroids[i]
+        coordinates = []
+        cluster = {
+            'centroid' : centroid,
+            'coordinates' : []
+        }
+    
+        clusters[i] = cluster
 
-   change = True
+    change = True
 
-   while change:
-
-
-       for i in range(locations.shape[0]):
-               dist = []
-              
-               curr = locations[i]
-              
-               for j in range(k):
-                   dis = computeEuclideanDistance(curr,clusters[j]['centroid'])
-                   dist.append(dis)
-               curr_cluster = np.argmin(dist)
-               clusters[curr_cluster]['coordinates'].append(curr)
+    while change:
 
 
-       curr_locations = copy.deepcopy(clusters)
- 
-       for i in range(k):
-               coordinates = np.array(clusters[i]['coordinates'])
-               if coordinates.shape[0] > 0:
-                   new_center = coordinates.mean(axis =0)
-                   clusters[i]['centroid'] = new_center
-                  
-                   clusters[i]['coordinates'] = []
-      
-       for i in range(locations.shape[0]):
-               dist = []
-              
-               curr = locations[i]
-              
-               for j in range(k):
-                   dis = computeEuclideanDistance(curr,clusters[j]['centroid'])
-                   dist.append(dis)
-               curr_cluster = np.argmin(dist)
-               clusters[curr_cluster]['coordinates'].append(curr)
-
-       count = 0
-       for i in range(k):
-            if not np.array_equal(clusters[i]['centroid'], curr_locations[i]['centroid']):
-                count += 1
+        for i in range(locations.shape[0]):
+                dist = []
+                
+                curr = locations[i]
+                
+                for j in range(k):
+                    dis = computeEuclideanDistance(curr,clusters[j]['centroid'])
+                    dist.append(dis)
+                curr_cluster = np.argmin(dist)
+                clusters[curr_cluster]['coordinates'].append(curr)
 
 
-       if count == 0:
-           change = False
+        curr_locations = copy.deepcopy(clusters)
+    
+        for i in range(k):
+                coordinates = np.array(clusters[i]['coordinates'])
+                if coordinates.shape[0] > 0:
+                    new_center = coordinates.mean(axis =0)
+                    clusters[i]['centroid'] = new_center
+                    
+                    clusters[i]['coordinates'] = []
+        
+        for i in range(locations.shape[0]):
+                dist = []
+                
+                curr = locations[i]
+                
+                for j in range(k):
+                    dis = computeEuclideanDistance(curr,clusters[j]['centroid'])
+                    dist.append(dis)
+                curr_cluster = np.argmin(dist)
+                clusters[curr_cluster]['coordinates'].append(curr)
 
-   return clusters
+        count = 0
+        for i in range(k):
+                if not np.array_equal(clusters[i]['centroid'], curr_locations[i]['centroid']):
+                    count += 1
+
+
+        if count == 0:
+            change = False
+
+    return clusters
 
 def main():
     print("ComputePossibleSolutions")
