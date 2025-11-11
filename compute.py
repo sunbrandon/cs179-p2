@@ -55,8 +55,8 @@ def nearest_neighbor(locations, start = 0):
     return tour
 
 def write_solution(tour, filename, drone_num, distance):
-    filename.replace('.txt', '')
-    output_filename = f"{filename}_{drone_num}_SOLUTION_{int(round(distance))}.txt"
+    prefix = filename.replace('.txt', '')
+    output_filename = f"{prefix}_{drone_num}_SOLUTION_{int(round(distance))}.txt"
     
     with open(output_filename, 'w') as file:
         for index in tour:
