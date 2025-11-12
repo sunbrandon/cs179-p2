@@ -140,7 +140,13 @@ def kmeans(locations,k):
     return clusters
 
 def main():
-    print("ComputePossibleSolutions")
+    command = str(input())
+    while command != "ComputePossibleSolutions" and command != "Exit":
+        command = str(input("Invalid Command.\nType \"ComputePossibleSolutions\" to begin.\nType \"Exit\" to halt.\n\n"))
+    
+    if command == "Exit": 
+        return
+    
     print()
     
     filename = input("Enter the name of file: ")
