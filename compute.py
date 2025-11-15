@@ -137,7 +137,13 @@ def kmeans(locations,k):
         if count == 0:
             change = False
 
-    return clusters
+    
+    objective = 0
+    for i in range(k):
+        objective += np.sum((np.array(clusters[i]['coordinates']) - clusters[i]['centroid'])**2)
+
+
+    return clusters, objective
 
 def main():
     print("ComputePossibleSolutions")
@@ -175,7 +181,8 @@ def main():
     all_clusters_info = []
 
     for k in range(1,5): # 4 experiments of k=1 through k=4.
-        clusters = kmeans(locations,k)
+        clusters, objective = kmeans(locations,k)
+        #print(objective)
         total_dist = 0
         output_list = []
         cluster_info = []
