@@ -141,7 +141,10 @@ def kmeans(locations,k):
 
     return clusters
 
-def visualize_routes(filename, clusters, output_name="Drone_Solution_Visualization.jpeg"):
+def visualize_routes(filename, clusters):
+    base_name = os.path.splitext(os.path.basename(filename))[0]
+    output_name = f"{base_name}_OVERALL_SOLUTION.jpeg"
+    
     colors = ['red', 'teal', 'green', 'blue']
     
     all_points = np.vstack([np.array(cluster['locations']) for cluster in clusters if cluster['locations']])
@@ -173,7 +176,9 @@ def visualize_routes(filename, clusters, output_name="Drone_Solution_Visualizati
     ax.axis('off')
     ax.legend(loc='center left', bbox_to_anchor=(1.05, 0.5))
 
-    plt.show()
+    desktop_path = os.path.join(os.path.expanduser("~"), "Desktop", output_name)
+    plt.savefig(desktop_path, bbox_inches='tight', dpi=300)
+    plt.close()
 
 def main():
     print("ComputePossibleSolutions")
