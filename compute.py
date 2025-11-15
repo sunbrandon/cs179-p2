@@ -3,6 +3,8 @@ import sys
 from datetime import datetime, timedelta
 import numpy as np
 import copy
+import matplotlib.pyplot as plt
+import os
 
 def read_locations(filename):
     locations = []
@@ -139,6 +141,40 @@ def kmeans(locations,k):
 
     return clusters
 
+def visualize_routes(filename, clusters, output_name="Drone_Solution_Visualization.jpeg"):
+    colors = ['red', 'teal', 'green', 'blue']
+    
+    all_points = np.vstack([np.array(cluster['locations']) for cluster in clusters if cluster['locations']])
+    x_min, y_min = np.min(all_points, axis=0)
+    x_max, y_max = np.max(all_points, axis=0)
+
+    buffer = 10  # 10-pixel buffer
+    fig, ax = plt.subplots(figsize=(12, 12))
+    
+    for i, cluster in enumerate(clusters):
+        locs = np.array(cluster['locations'])
+        centroid = cluster['centroid']
+        tour = cluster.get('tour', [])
+
+        if locs.shape[0] == 0:
+            continue
+
+        locs_ordered = locs[[cluster['original_indices'].index(idx) for idx in tour if idx in cluster['original_indices']]]
+
+        color = colors[i % len(colors)]
+        ax.plot(locs_ordered[:, 0], locs_ordered[:, 1], color=color, linewidth=1.5, label=f"Drone {i+1}")
+
+        ax.scatter(locs[:, 0], locs[:, 1], color=color, s=10)
+        ax.scatter(centroid[0], centroid[1], s=100, c='black', marker='o', edgecolors='gray', linewidths=1.0, zorder=5)
+
+    ax.set_aspect('equal')
+    ax.set_xlim(x_min - buffer, x_max + buffer)
+    ax.set_ylim(y_min - buffer, y_max + buffer)
+    ax.axis('off')
+    ax.legend(loc='center left', bbox_to_anchor=(1.05, 0.5))
+
+    plt.show()
+
 def main():
     print("ComputePossibleSolutions")
     print()
@@ -227,6 +263,8 @@ def main():
 
         files_str = ", ".join(output_files)
         print(f"Writing {files_str} to disk")
+
+        visualize_routes(filename, chosen_clusters)
                 
     except ValueError:
         print("Invalid input. No files written.")
